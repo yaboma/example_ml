@@ -1,0 +1,7 @@
+lightgbm==3.3.2
+xgboost==1.5.2
+catboost==1.0.4
+plotly==5.6.0
+scikit-learn==1.0.2
+poetry-kernel==0.1.0
+shap==0.40.0

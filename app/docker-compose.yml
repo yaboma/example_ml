@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:14.2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_PASSWORD=${SUPERUSER_PASS}
+    ports:
+     - 5432:5432
+    networks:
+     - deploy_network
+    volumes:
+     - mas-pgdata:/var/lib/postgresql/data
+    container_name: storage
+
+  mas_calculator:
+    build: back/
+    depends_on:
+      - postgres
+    ports: 
+      - 8000:8000
+    networks:
+      - deploy_network
+    container_name: mas_calculator
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=${DB_HOST}
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - ./back/db/migrations/versions/:/mas_calculator/db/migrations/versions/
+
+  front:
+    build: front/
+    depends_on:
+     - mas_calculator
+    ports: 
+     - 8501:8501
+    networks:
+     - deploy_network
+    container_name: front
+    
+
+
+networks:
+  deploy_network:
+    driver: bridge
+
+volumes:
+  mas-pgdata:
